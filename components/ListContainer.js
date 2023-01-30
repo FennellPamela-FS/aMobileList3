@@ -1,40 +1,89 @@
+import React, { useState, useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, FlatList, Text, View } from 'react-native';
+import { SafeAreaView, FlatList, Text, View, TouchableOpacity, TouchableHighlight, Button, Pressable } from 'react-native';
 import ListItem from './ListItem';
 
-import styles from '../Appstyles'
+// Styles
+import styles from '../Appstyles';
 
 
 export default function ListContainer({ data }) {
 
-    const DATA = [
-        {
-            _id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-            title: 'First Item',
-        },
-        {
-            _id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-            title: 'Second Item',
-        },
-        {
-            _id: '58694a0f-3da1-471f-bd96-145571e29d72',
-            title: 'Third Item',
-        },
-    ];
+    const [series, setSeries] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState(null);
 
-    // const renderItem = ({ item }) => (
-    //     <ListItem>{item.title}</ListItem>
-    // );
+    const [values, setValues] = useState({
+        title: '',
+        description: '',
+        videolink: '',
+    })
+
+    const API_BASE = 'https://mycrudapi.herokuapp.com/api/v1';
+
+    useEffect(() => {
+        let ignore = false;
+
+        // reach out to API only once
+        if (!ignore) {
+            getSeries();
+        }
+        return () => {
+            ignore = true;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // no dependencies
+
+    const getSeries = async () => {
+        setLoading(true)
+        try {
+            await fetch(`${API_BASE}/series`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log({ data });
+                    setSeries(data);
+                    setValues({
+                        ...values,
+                        title: data.title,
+                        info: data.description,
+                        videolink: data.videolink
+                    })
+                });
+        } catch (error) {
+            // setErrors(error.message || "Unexpected Error")
+            setErrors({
+                ...errors,
+                fetchError: true,
+                fetchErrorMsg:
+                    'Unexpected Error',
+            })
+        } finally {
+            setLoading({ ...loading, loading: false });
+        }
+
+    }
+
+
 
     return (
-        // loop or map over our item to get the info
-        <FlatList
-            data={DATA}
-            renderItem={({ item }) => <ListItem>{item.title}</ListItem>}
-            keyExtractor={item => item._id}
-            style={styles.listContainer}
-        />
+        <SafeAreaView style={styles.container}>
+            {/* loop or map over our item to get the info */}
+            <FlatList
+                data={series}
+                renderItem={({ item }) =>
+                    <View>
+                        <ListItem>
+                            <Button title='Series Profile' onPress={() => navigation.navigate('SeriesProfile', `${item._id}`)} style={styles.link1} />
+                            <Text style={styles.myText}>{item.title} </Text>
+                            <Text style={styles.myText}>{item.videolink} </Text>
+                            <Button title='Watch Video' onPress={() => navigation.navigate(`${item.videolink}`)} style={styles.link2} />
+                        </ListItem>
+                    </View>
+                }
+                keyExtractor={item => item._id}
+                style={styles.listContainer}
+            />
+            {/* <MySeries /> */}
+        </SafeAreaView >
     );
 }
-
-

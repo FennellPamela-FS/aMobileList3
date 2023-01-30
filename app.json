@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "AwesomeProject",
-    "slug": "AwesomeProject",
+    "name": "amobilelist3",
+    "slug": "amobilelist3",
     "version": "1.0.0",
+    "entryPoint": "./index.js",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
